@@ -29,6 +29,7 @@ class Menu extends Phaser.Scene{
         this.load.spritesheet("easy", "assets/easybutton.png",{ frameWidth: 500, frameHeight: 431 });
         this.load.spritesheet("normal", "assets/normalbutton.png",{ frameWidth: 500, frameHeight: 431 });
         this.load.spritesheet("hard", "assets/hardbutton.png",{ frameWidth: 500, frameHeight: 431 });
+        this.load.spritesheet("doom", "assets/doombutton.png",{ frameWidth: 500, frameHeight: 431 });
         this.load.spritesheet("sfx", "assets/sfxButton.png",{ frameWidth: 200, frameHeight: 200 });
         this.load.spritesheet("musicButton", "assets/musicButton.png",{ frameWidth: 200, frameHeight: 200 });
         this.load.audio('buttonClick', 'assets/audio/buttonclick.mp3'); 
@@ -64,6 +65,7 @@ class Menu extends Phaser.Scene{
             if(this.buttonClick != null){
                 this.buttonClick.play();
             };
+            if(difficulty != 'doom'){
             if(this.osu == false){
                 osuLogo.setFrame(0);
                 this.osutext.setVisible(true);
@@ -73,7 +75,7 @@ class Menu extends Phaser.Scene{
                 this.osutext.setVisible(false);
                 this.osu = false;
             }
-    
+        };
             
         }, this).on('pointerup', function(){
             
@@ -199,6 +201,12 @@ class Menu extends Phaser.Scene{
                 this.hard.setFrame(1);
             };
 
+            if(difficulty == 'doom'){
+                this.doom.setFrame(0);
+            }else{
+                this.doom.setFrame(1);
+            };
+
             console.log(mode);
         }, this).on('pointerup', function(){
             this.setFrame(0);
@@ -238,6 +246,12 @@ class Menu extends Phaser.Scene{
                 this.hard.setFrame(3);
             };
 
+            if(difficulty == 'doom'){
+                this.doom.setFrame(2);
+            }else{
+                this.doom.setFrame(3);
+            };
+
             console.log(mode);
         }, this).on('pointerup', function(){
             this.setFrame(0);
@@ -250,7 +264,7 @@ class Menu extends Phaser.Scene{
             }
         });
 
-        this.easy = this.add.sprite(gameW/2.5, gameH*0.3, 'easy').setScale(0.3).setInteractive().on('pointerover', function(){
+        this.easy = this.add.sprite(gameW/3, gameH*0.3, 'easy').setScale(0.3).setInteractive().on('pointerover', function(){
             if(mode == 'default'){
                 this.setFrame(0);
             }else{
@@ -258,11 +272,7 @@ class Menu extends Phaser.Scene{
             };
             
         }).on('pointerdown', function(event){
-            if(mode == 'default'){
-                this.easy.setFrame(0);
-            }else{
-                this.easy.setFrame(2);
-            };
+    
             if(this.buttonClick != null){
                 this.buttonClick.play();
             };
@@ -272,16 +282,20 @@ class Menu extends Phaser.Scene{
             difficulty = 'easy';
 
             if(mode == 'default'){
+                this.easy.setFrame(0);
+
                 this.normal.setFrame(1);
+                this.hard.setFrame(1);
+                this.doom.setFrame(1);
             }else{
+                this.easy.setFrame(2);
+
                 this.normal.setFrame(3);
+                this.hard.setFrame(3);
+                this.doom.setFrame(3);
             };
 
-            if(mode == 'default'){
-                this.hard.setFrame(1);
-            }else{
-                this.hard.setFrame(3);
-            };
+            
 
             console.log(difficulty);
         }, this).on('pointerup', function(){
@@ -309,7 +323,7 @@ class Menu extends Phaser.Scene{
             this.easy.setFrame(3);
         };
 
-        this.normal = this.add.sprite(gameW/2, gameH*0.3, 'normal').setScale(0.3).setInteractive().on('pointerover', function(){
+        this.normal = this.add.sprite(gameW/2.4, gameH*0.3, 'normal').setScale(0.3).setInteractive().on('pointerover', function(){
             if(mode == 'default'){
                 this.setFrame(0);
             }else{
@@ -320,22 +334,22 @@ class Menu extends Phaser.Scene{
             if(this.buttonClick != null){
                 this.buttonClick.play();
             };
-            if(mode == 'default'){
-                this.normal.setFrame(0);
-            }else{
-                this.normal.setFrame(2);
-            };
-            if(mode == 'default'){
-                this.easy.setFrame(1);
-            }else{
-                this.easy.setFrame(3);
-            };
+ 
 
             if(mode == 'default'){
+                this.normal.setFrame(0);
+
+                this.easy.setFrame(1);
                 this.hard.setFrame(1);
+                this.doom.setFrame(1);
             }else{
+                this.normal.setFrame(2);
+
+                this.easy.setFrame(3);
                 this.hard.setFrame(3);
+                this.doom.setFrame(3);
             };
+
 
             difficulty = 'normal';
             console.log(difficulty);
@@ -364,7 +378,7 @@ class Menu extends Phaser.Scene{
             this.normal.setFrame(2);
         };
 
-        this.hard = this.add.sprite(gameW/ 1.665, gameH*0.3, 'hard').setScale(0.3).setInteractive().on('pointerover', function(){
+        this.hard = this.add.sprite(gameW/ 2, gameH*0.3, 'hard').setScale(0.3).setInteractive().on('pointerover', function(){
             if(mode == 'default'){
                 this.setFrame(0);
             }else{
@@ -377,25 +391,21 @@ class Menu extends Phaser.Scene{
             };
             if(mode == 'default'){
                 this.hard.setFrame(0);
+
+                this.normal.setFrame(1);
+                this.easy.setFrame(1);
+                this.doom.setFrame(1);
             }else{
                 this.hard.setFrame(2);
+
+                this.normal.setFrame(3);
+                this.easy.setFrame(3);
+                this.doom.setFrame(3);
             };
             // if(this.anime != null){
             //     this.anime.setFrame(1);
             // }
             difficulty = 'hard';
-
-            if(mode == 'default'){
-                this.normal.setFrame(1);
-            }else{
-                this.normal.setFrame(3);
-            };
-
-            if(mode == 'default'){
-                this.easy.setFrame(1);
-            }else{
-                this.easy.setFrame(3);
-            };
 
             console.log(difficulty);
         }, this).on('pointerup', function(){
@@ -422,6 +432,68 @@ class Menu extends Phaser.Scene{
         }else{
             this.hard.setFrame(3);
         };
+
+        this.doom = this.add.sprite(gameW/ 1.715, gameH*0.3, 'doom').setScale(0.3).setInteractive().on('pointerover', function(){
+            if(mode == 'default'){
+                this.setFrame(0);
+            }else{
+                this.setFrame(2);
+            };
+            
+        }).on('pointerdown', function(event){
+            if(this.buttonClick != null){
+                this.buttonClick.play();
+            };
+            if(mode == 'default'){
+                this.doom.setFrame(0);
+
+                this.normal.setFrame(1);
+                this.easy.setFrame(1);
+                this.hard.setFrame(1);
+            }else{
+                this.doom.setFrame(2);
+
+                this.normal.setFrame(3);
+                this.easy.setFrame(3);
+                this.hard.setFrame(3);
+            };
+            // if(this.anime != null){
+            //     this.anime.setFrame(1);
+            // }
+            difficulty = 'doom';
+
+            osuLogo.setFrame(1);
+                this.osutext.setVisible(false);
+                this.osu = false;
+            // mode = 'doom';
+
+            console.log(difficulty);
+        }, this).on('pointerup', function(){
+            if(this.buttonClick != null){
+                this.buttonClick.play();
+            };
+            if(mode == 'default'){
+                this.setFrame(0);
+            }else{
+                this.setFrame(2);
+            };
+        }).on('pointerout', function(){
+            if(difficulty != 'doom'){
+                if(mode == 'default'){
+                    this.setFrame(1);
+                }else{
+                    this.setFrame(3);
+                };
+            }
+        });
+
+        if(mode == 'default'){
+            this.doom.setFrame(1);
+        }else{
+            this.doom.setFrame(3);
+        };
+
+
 
         this.start = this.add.sprite(gameW/2, gameH * 0.9, 'start').setScale(0.7).setFrame(0).setInteractive().on('pointerover', function(){
             this.setFrame(1);
@@ -520,7 +592,9 @@ var Check = new Phaser.Class({
         });
                         
         this.input.keyboard.on('keydown-SPACE', ()=>{
-
+            if(this.mode == 'doom'){
+            this.background.isPaused(false);
+            };
             this.scene.stop('Check');
             this.scene.resume('Play');
 

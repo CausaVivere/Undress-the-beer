@@ -11,7 +11,12 @@ export default class Play extends Phaser.Scene{
         };
     
     init(info){
+        if(info[1]=='doom'){
+            this.mode = 'doom';
+            this.doommode= info[0];
+        }else{
         this.mode = info[0];
+        };
         this.difficulty = info[1];
         this.sfxClick = info[2];
         this.musicClick = info[3];
@@ -29,6 +34,74 @@ export default class Play extends Phaser.Scene{
     };
     
     preload(){
+        this.progressBar = this.add.graphics();
+        this.progressBox = this.add.graphics();
+        this.progressBox.fillStyle(0x222222, 0.8);
+        this.progressBox.fillRect(240, 270, 320, 50);
+        
+
+        var width = this.cameras.main.width;
+        var height = this.cameras.main.height;
+        this.progressBar.x=this.sys.game.config.width/2 -400;
+        this.progressBox.x = this.sys.game.config.width/2 - 400;
+        this.loadingText = this.make.text({
+            x: width / 2,
+            y: height / 2 - 50,
+            text: 'Loading...',
+            style: {
+                font: '20px monospace',
+                fill: '#ffffff'
+            }
+        });
+        this.loadingText.setOrigin(0.5, 0.5);
+        
+        this.percentText = this.make.text({
+            x: width / 2,
+            y: height / 2 - 5,
+            text: '0%',
+            style: {
+                font: '18px monospace',
+                fill: '#ffffff'
+            }
+        });
+        this.percentText.setOrigin(0.5, 0.5);
+        
+        this.assetText = this.make.text({
+            x: width / 2,
+            y: height / 2 + 50,
+            text: '',
+            style: {
+                font: '18px monospace',
+                fill: '#ffffff'
+            }
+        });
+        this.assetText.setOrigin(0.5, 0.5);
+
+        this.progressBar.setVisible(true);
+        this.progressBox.setVisible(true);
+        this.loadingText.setVisible(true);
+            this.percentText.setVisible(true);
+            this.assetText.setVisible(true);
+        
+        this.load.on('progress', (value)=>{
+            this.percentText.setText(parseInt(value * 100) + '%');
+            this.progressBar.clear();
+            this.progressBar.fillStyle(0xffffff, 1);
+            this.progressBar.fillRect(250, 280, 300 * value, 30);
+        });
+        
+        this.load.on('fileprogress', (file)=> {
+            this.assetText.setText('Loading asset: ' + file.key);
+        });
+        this.load.on('complete', ()=>{
+            this.progressBar.setVisible(false);
+            this.progressBox.setVisible(false);
+            this.loadingText.setVisible(false);
+            this.percentText.setVisible(false);
+            this.assetText.setVisible(false);
+        });
+
+
         //load images
         if(this.mode == 'default'){
             this.load.image('bg', 'assets/barcounter.jpg');
@@ -39,14 +112,29 @@ export default class Play extends Phaser.Scene{
             };
             this.load.image('backboard', 'assets/backboard.png');
             this.load.image('pole', 'assets/pole.png');
-        }else {
+        }else if(this.mode == 'anime'){
             this.load.image('abg', 'assets/animebarcounter.png');
             this.load.image('table', 'assets/atable.png');
             this.load.image('backboard', 'assets/abackboard.png');
             this.load.image('pole', 'assets/apole.png');
+        }else{
+            // this.load.image('abg', 'assets/animebarcounter.png');
+            if(this.doommode=='anime'){
+                this.load.video('poltergeist', 'assets/video/poltergeist.mp4', 'loadeddata', false, true);
+            }else{
+                this.load.video('limewire', 'assets/video/limewire.mp4', 'loadeddata', false, true);
+            };
+            this.load.spritesheet('table', 'assets/doomtable.png',{ frameWidth: 621, frameHeight: 900 });
+            this.load.image('pole', 'assets/doompole.png');
+            this.load.image('doomCrate', 'assets/doomcrate.png');
+            this.load.image('blackCrate', 'assets/doomcrateblack.png');
         };
         
         
+        if(this.difficulty == 'doom'){
+            this.load.image('doomBottle', 'assets/doomBeer.png');
+            this.load.image('blackBottle', 'assets/doomBeerblack.png');
+        }else{
         this.load.image('beerBottle', 'assets/beer.png');
         this.load.image('scalerBeerBottle', 'assets/scalerBeer.png');
         this.load.image('timerBeerBottle', 'assets/timerBeer.png');
@@ -54,14 +142,17 @@ export default class Play extends Phaser.Scene{
         if(this.osu == true){
             this.load.image('strikeBottle', 'assets/strikeBeer.png');
         };
+    };
         this.load.image('beerCrate', 'assets/crate.png');
         this.load.image('error', 'assets/error.png');
         this.load.image('frame', 'assets/frame.png');
+        this.load.image('board', 'assets/board.png');
+
         this.load.image('card', 'assets/card.png');
         this.load.spritesheet("return", "assets/return.png",{ frameWidth: 200, frameHeight: 100 });
         this.load.spritesheet("sfx", "assets/sfxButton.png",{ frameWidth: 200, frameHeight: 200 });
         this.load.spritesheet("musicButton", "assets/musicButton.png",{ frameWidth: 200, frameHeight: 200 });
-        this.load.image('board', 'assets/board.png');
+        
     
         if(this.mode == 'default' && this.difficulty == 'easy'){
             this.load.image('1', 'assets/rileyreid/1.png');
@@ -101,7 +192,11 @@ export default class Play extends Phaser.Scene{
             this.load.image('5', 'assets/hinata/5.png');
             this.load.image('6', 'assets/hinata/6.png');
             this.load.image('7', 'assets/hinata/7.png');
-        }
+        }else if(this.difficulty == 'doom' && this.doommode == 'anime'){
+            this.load.video('animedoom', 'assets/video/animedoom.mp4');
+        }else if(this.difficulty == 'doom' && this.doommode == 'default'){
+            this.load.video('defdoom', 'assets/video/defdoom.mp4');
+        };
 
         let x = Math.floor(Math.random() * 3);
 
@@ -122,7 +217,7 @@ export default class Play extends Phaser.Scene{
                     this.load.audio('music', 'assets/audio/music3.mp3'); 
                     break;
             }
-        }else{
+        }else if(this.mode == 'anime'){
             this.load.audio('cheer1', 'assets/audio/as1.mp3'); 
             this.load.audio('cheer2', 'assets/audio/as2.mp3'); 
             this.load.audio('cheer3', 'assets/audio/as3.mp3'); 
@@ -139,7 +234,13 @@ export default class Play extends Phaser.Scene{
                     this.load.audio('music', 'assets/audio/music6.mp3'); 
                     break;
             }
-        }
+        }else{
+            if(this.doommode=='anime'){
+            this.load.audio('music', 'assets/audio/poltergeist.mp3');
+            }else{
+                this.load.audio('music', 'assets/audio/limewire.mp3');
+            };
+        };
 
         this.load.audio('buttonClick', 'assets/audio/buttonclick.mp3'); 
         
@@ -147,6 +248,7 @@ export default class Play extends Phaser.Scene{
         this.load.audio('strike', 'assets/audio/strike.mp3');
         this.load.audio('gameover', 'assets/audio/gameover.mp3');
         this.load.audio('grab', 'assets/audio/grab.mp3');
+
     };
     
     
@@ -161,7 +263,10 @@ export default class Play extends Phaser.Scene{
         
 
         this.input.keyboard.on('keydown-P', ()=>{
-
+            if(this.difficulty == 'doom'){
+                this.background.isPaused(true);
+            };
+            this.music.pause();
             this.scene.pause('Play');
             this.scene.launch('Pause');
 
@@ -171,34 +276,55 @@ export default class Play extends Phaser.Scene{
         let gameW = this.sys.game.config.width;
         let gameH = this.sys.game.config.height;
         this.strikeX = gameW*0.1;
+
         if(this.mode == 'default'){
             this.background = this.add.sprite(0, 0 , 'bg');
-        }else {
+            this.background.setPosition(gameW/2,gameH/2).setDisplaySize(gameW, gameH);
+        }else if(this.mode == 'anime'){
             this.background = this.add.sprite(0, 0 , 'abg');
-        }
-        this.background.setPosition(gameW/2,gameH/2).setDisplaySize(gameW, gameH);
+            this.background.setPosition(gameW/2,gameH/2).setDisplaySize(gameW, gameH);
+        }else{
+            // this.background = this.add.sprite(0, 0 , 'abg');
+            if(this.doommode=='anime'){
+            this.background = this.add.video(gameW/2,gameH/2, 'poltergeist').setDisplaySize(gameW, gameH);
+            }else{
+                this.background = this.add.video(gameW/2,gameH/2, 'limewire').setDisplaySize(gameW, gameH);
+            };
+            this.background.play(true).setMute(true);
+    
+            // Prevents video freeze when game is out of focus (i.e. user changes tab on the browser)
+            // this.background.setPaused(false);
+        };
+        
     
         this.music = this.sound.add('music').setVolume(0.7);
-        this.music.setLoop(true);
+
         this.buttonClick = this.sound.add('buttonClick');
         if(this.mode == 'default'){
+            this.music.setLoop(true);
             this.cheer1 = this.sound.add('cheer1').setVolume(0.3);
             this.cheer2 = this.sound.add('cheer2').setVolume(0.3);
             this.cheer3 = this.sound.add('cheer3').setVolume(0.3);
             this.cheer4 = this.sound.add('cheer4').setVolume(0.3);
-        }else{
+        }else if(this.mode == 'anime'){
+            this.music.setLoop(true);
             this.cheer1 = this.sound.add('cheer1').setVolume(1);
             this.cheer2 = this.sound.add('cheer2').setVolume(1);
             this.cheer3 = this.sound.add('cheer3').setVolume(1);
             this.cheer4 = this.sound.add('cheer4').setVolume(1);
         }
-        this.winSound = this.sound.add('winSound').setVolume(1);
-        this.strikeSound = this.sound.add('strike').setVolume(0.2);
-        this.gameover = this.sound.add('gameover').setVolume(1);
-        this.catch = this.sound.add('grab').setVolume(0.25);
-        this.music.play();
-        this.music.setMute(this.musicClick);
+        if(this.difficulty != 'doom'){
+            this.winSound = this.sound.add('winSound').setVolume(1);
+            this.catch = this.sound.add('grab').setVolume(0.25);
+
+        };
+        
         function stopSFX(scene, value){
+            scene.strikeSound.setMute(value);
+            scene.gameover.setMute(value);
+            
+
+            if(scene.difficulty != 'doom'){
             scene.winSound.setMute(value);
             scene.strikeSound.setMute(value);
             scene.gameover.setMute(value);
@@ -207,8 +333,15 @@ export default class Play extends Phaser.Scene{
             scene.cheer2.setMute(value);
             scene.cheer3.setMute(value);
             scene.cheer4.setMute(value);
-
+            };
         };
+
+        this.strikeSound = this.sound.add('strike').setVolume(0.2);
+        this.gameover = this.sound.add('gameover').setVolume(1);
+        
+        this.music.play();
+        this.music.setMute(this.musicClick);
+        
         stopSFX(this, this.sfxClick);
         
         this.sfxButton = this.add.sprite(gameW*0.1, gameH/1.7, 'sfx').setFrame(0).setScale(0.7).setInteractive().on('pointerover', function(){
@@ -288,8 +421,11 @@ export default class Play extends Phaser.Scene{
             this.musicButton.setFrame(1);
         };
         
-      
+        
         this.table = this.add.sprite(gameW/2, gameH/2 , 'table');
+        if(this.difficulty == 'doom'){
+            this.table.setFrame(0);
+        };
         this.table.setDisplaySize(this.table.width, gameH);
         this.switch;
         
@@ -310,8 +446,12 @@ export default class Play extends Phaser.Scene{
         this.mutemusictext = this.add.text(gameW * 0.02, gameH*0.8, "PRESS 'M' TO STOP MUSIC", { font: "bold 25px Arial", fill: "#ffffff", stroke: '#000000', strokeThickness: 5 });
         this.mutesfxtext = this.add.text(gameW * 0.02, gameH*0.9, "PRESS 'N' TO MUTE SOUND EFFECTS", { font: "bold 25px Arial", fill: "#ffffff", stroke: '#000000', strokeThickness: 5 });
 
-
-        this.crate = this.physics.add.sprite(gameW/2, gameH/1.1 + 30 , 'beerCrate').setScale(0.4);
+        if(this.difficulty == 'doom'){
+            this.crate = this.physics.add.sprite(gameW/2, gameH/1.1 + 30 , 'doomCrate').setScale(0.4);
+        }else{
+            this.crate = this.physics.add.sprite(gameW/2, gameH/1.1 + 30 , 'beerCrate').setScale(0.4);
+        }
+        
         this.crate.setImmovable(true);
     
         this.pole1 = this.add.sprite(gameW/2 + 343, gameH/2 , 'pole').setScale(1.5).setFlip(true, false);
@@ -319,12 +459,22 @@ export default class Play extends Phaser.Scene{
         this.pole2 = this.add.sprite(gameW/2 - 343, gameH/2 , 'pole').setScale(1.5);
         // this.pole2.setDisplaySize(this.pole2.width, gameH);
         // this.crate.setCollideWorldBounds(true);
+
+        if(this.difficulty == 'doom'){
+            this.pole1.x = (this.table.x + this.table.width /2 ) + this.pole2.width - 24;
+            this.pole2.x = (this.table.x - this.table.width /2 ) - this.pole2.width + 24;
+            this.pole1.setDisplaySize(this.pole1.width * 0.9, gameH);
+            this.pole2.setDisplaySize(this.pole2.width * 0.9, gameH);
+            this.board.setVisible(false);
+            this.scoreTitle.setVisible(false);
+            this.scoreNumber.setVisible(false);
+        };
     
         this.physics.world.bounds.width = this.table.width;
         this.physics.world.bounds.x = this.table.x - this.table.width/2;
         
-        this.zone = this.add.zone(gameW/2 , gameH+30, 600, 10);
-    
+        this.zone = this.add.zone(gameW/2 , gameH+30, this.table.width, 10);
+        
         this.physics.world.enable(this.zone);
         this.zone.body.setAllowGravity(false);
         this.zone.body.moves = false;
@@ -355,16 +505,18 @@ export default class Play extends Phaser.Scene{
         
         this.ready=false;
         var timedEvent = this.time.delayedCall(1500 ,()=>{
-
+            this.scoreNumber.setText('0');
             this.ready = true;
         } , [], this);
         
+        if(this.difficulty != 'doom'){
         this.backboard = this.add.sprite(gameW/1.22, gameH/2 , 'backboard').setDepth(1);
         this.frame = this.add.sprite(gameW/1.22, gameH/2 , 'frame').setDepth(3);
         if(this.mode =='anime'){
             this.frame.setTint(0xff00ff);
             this.backboard.setTint(0xffb7c5);
         };
+    
 
         if(this.difficulty == 'easy' && this.mode == 'default'){
             this.img1 = this.add.sprite(this.frame.x, gameH/2 + 50 , '1').setDepth(2);
@@ -473,9 +625,10 @@ export default class Play extends Phaser.Scene{
         this.shadow7.setOrigin(0.6, 0.48);
         this.shadow7.tint = 0x000000;
         this.shadow7.alpha = 0.6;
-
         
-
+    };
+        
+//debugging
         // this.pole1.setInteractive().on('pointerdown', ()=>{
 
         //     if(this.osu == true){
@@ -484,7 +637,8 @@ export default class Play extends Phaser.Scene{
         //     }else{
         //         this.score += 1000;
         //     }
-          
+       
+        //     // this.music.stop();
 
         // });
         
@@ -501,7 +655,277 @@ export default class Play extends Phaser.Scene{
         this.currentbottle;
         this.strikeLimiter = false;
         this.score = 0;
+        this.inverted = false;
         
+        if(this.difficulty == 'doom' && this.doommode == 'anime' ){
+            var timedEvent = this.time.delayedCall(13500, ()=>{
+                this.speedBuff = 30;
+            
+            });
+
+            var timedEvent = this.time.delayedCall(19000, ()=>{
+       
+                this.background.setAlpha(0.5);
+            });
+
+            var timedEvent = this.time.delayedCall(38000, ()=>{
+                this.speedBuff = 2;
+                this.delta += 220;
+                this.speed = 1300;
+                this.threshold = 200;
+                this.background.setAlpha(0.8);
+            });
+
+            var timedEvent = this.time.delayedCall(76000, ()=>{
+                this.speedBuff = 10;
+                this.delta += 220;
+                this.speed = 600;
+                this.threshold = 250;
+                inversion(this);
+            });
+
+            var timedEvent = this.time.delayedCall(96000, ()=>{
+                this.speedBuff = 10;
+                this.delta += 220;
+                this.speed = 1300;
+                this.threshold = 200;
+                reversion(this);
+            });
+
+            this.target = 10000;
+                this.speedBuff = 0;
+                this.speed = 1200;
+                this.threshold = 180;
+                this.bottleScore = 10;
+              
+         };
+
+         if(this.difficulty == 'doom' && this.doommode == 'default' ){
+            var timedEvent = this.time.delayedCall(20000, ()=>{
+                this.speedBuff = 30;
+                
+            });
+
+            var timedEvent = this.time.delayedCall(22000, ()=>{
+       
+                this.background.setAlpha(0.5);
+            });
+
+            var timedEvent = this.time.delayedCall(33000, ()=>{
+                this.speedBuff = 5;
+                this.delta += 220;
+                this.speed = 1300;
+                this.threshold = 200;
+                this.background.setAlpha(1);
+            });
+
+            var timedEvent = this.time.delayedCall(66000, ()=>{
+                this.speedBuff = 10;
+                this.delta += 220;
+                this.speed = 800;
+                this.threshold = 220;
+            });
+
+
+            var timedEvent = this.time.delayedCall(78000, ()=>{
+                this.speedBuff = 10;
+                this.delta += 220;
+                this.speed = 600;
+                this.threshold = 250;
+                inversion(this);
+            });
+
+            var timedEvent = this.time.delayedCall(98000, ()=>{
+                this.speedBuff = 0;
+                this.speed = 1200;
+                this.threshold = 200;
+                this.bottleScore = 10;
+                reversion(this);
+            });
+
+            var timedEvent = this.time.delayedCall(113000, ()=>{
+                this.speedBuff = 30;
+                this.background.setAlpha(0.5);
+            });
+
+            var timedEvent = this.time.delayedCall(121000, ()=>{
+                this.speedBuff = 40;
+                
+            });
+
+            this.target = 10000;
+            this.speedBuff = 0;
+            this.speed = 1200;
+            this.threshold = 180;
+            this.bottleScore = 10;
+            
+           
+         };
+
+         function hideUI(scene){
+            // scene.board.setVisible(false);
+            // scene.scoreTitle.setVisible(false);
+            // scene.scoreNumber.setVisible(false);
+            scene.pausetext.setVisible(false);
+            scene.mutemusictext.setVisible(false);
+            scene.mutesfxtext.setVisible(false);
+            scene.sfxButton.setVisible(false);
+            scene.musicButton.setVisible(false);
+         };
+
+         function showUI(scene){
+            // scene.board.setVisible(true);
+            // scene.scoreTitle.setVisible(true);
+            // scene.scoreNumber.setVisible(true);
+            scene.pausetext.setVisible(true);
+            scene.mutemusictext.setVisible(true);
+            scene.mutesfxtext.setVisible(true);
+            scene.sfxButton.setVisible(true);
+            scene.musicButton.setVisible(true);
+         };
+
+         function inversion(scene){
+            scene.inverted = true;
+            hideUI(scene);
+            
+            
+            scene.table.setFrame(1);
+            scene.orginialtablewidth = scene.table.width;
+            scene.table.width = scene.table.width * 1.7;
+            scene.zone.width = scene.table.width;
+            scene.table.setDisplaySize(scene.table.width, gameH);
+            scene.pole1.x = (scene.table.x + scene.table.width /2 ) + scene.pole2.width - 24;
+            scene.pole2.x = (scene.table.x - scene.table.width /2 ) - scene.pole2.width + 24;
+            scene.crate2 = scene.physics.add.sprite(gameW/2, gameH/1.1 + 30 , 'blackCrate').setScale(0.4);
+            scene.crate2.setImmovable(scene);
+            scene.crate2.setOrigin(0.5,0.5);
+            scene.input.on('pointermove', function(pointer) {
+
+                scene.crate2.x = gameW - pointer.x ;
+              
+            });
+
+            scene.crate.setScale(0.5);
+            scene.crate2.setScale(0.5);
+
+            for (let index = 0; index < scene.bottles.length; index++) {
+                const element = scene.bottles[index];
+                element.destroy();
+           
+            };
+         };
+
+         function reversion(scene){
+            scene.inverted = false;
+            showUI(scene);
+       
+            scene.table.setFrame(0);
+            scene.table.width = scene.orginialtablewidth;
+            scene.zone.width = scene.table.width;
+            scene.table.setDisplaySize(scene.table.width, gameH);
+            scene.pole1.x = (scene.table.x + scene.table.width /2 ) + scene.pole2.width - 24;
+            scene.pole2.x = (scene.table.x - scene.table.width /2 ) - scene.pole2.width + 24;
+            scene.crate2.destroy();
+            for (let index = 0; index < scene.bottles.length; index++) {
+                const element = scene.bottles[index];
+                element.destroy();
+           
+            };
+
+            scene.crate.setScale(0.4);
+            scene.crate2.setScale(0.4);
+         };
+
+         function distruge(obj){
+            if(obj != null){
+                obj.destroy()
+
+            }
+        }
+         
+
+        if(this.difficulty == 'doom'){
+            this.music.on('complete', ()=>{
+                this.ready = false;
+                this.over = true;
+                this.switch = false;
+             
+                this.buttonClick.play();
+                this.table.setInteractive(false);
+                    distruge(this.pole1);
+                    distruge(this.pole2);
+                    distruge(this.table);
+                    
+                    distruge(this.winSound);
+                    hideUI(this);
+                    console.log('win');
+                    this.background.stop();
+                    distruge(this.background);
+                    if(this.doommode=='anime'){
+                        this.win = this.add.video(gameW/2,gameH/2, 'animedoom').setDisplaySize(gameW, gameH);
+                    }else{
+                        this.win = this.add.video(gameW/2,gameH/2, 'defdoom').setDisplaySize(gameW, gameH);
+                    };
+                    
+                    this.win.play(true);
+
+                    this.return = this.add.sprite(gameW/2, gameH * 0.8, 'return').setDepth(6).setScale(0.7).setFrame(0).setInteractive().on('pointerover', function(){
+                        this.setFrame(1);
+                    }).on('pointerdown', function(event){
+                    
+                        this.return.setFrame(1);
+                        this.buttonClick.play();
+            
+                        distruge(this.win);
+                        
+                        var timedEvent = this.time.delayedCall(1500, ()=>{
+                            
+                            // this.win.destroy();
+                            // this.shadow6.destroy();
+    
+    
+    
+                                
+                                this.textures.remove('table');
+                                this.textures.remove('pole');
+                           
+                            
+                            this.cache.audio.remove('music');
+                            this.cache.video.remove('poltergeist');
+                            this.cache.video.remove('animedoom');
+                        
+                       
+                            // this.scene.restart('Menu');
+                            
+                            let info = [this.sfxClick, this.musicClick, true];
+                            console.log(info);
+                            this.score = 0;
+                    this.bottlesSpawned = 0;
+                    this.osuScore = 0;
+                    
+                    distruge(this.scoreNumber);
+                        distruge(this.scoreTitle);
+                            this.scene.start('Menu', info);
+                           
+                    } , [], this);
+            
+                    }, this).on('pointerup', function(){
+                        this.setFrame(0);
+                        
+                    }).on('pointerout', function(){
+            
+                        this.setFrame(0);
+                    });
+                });
+        };
+
+     
+        if(this.difficulty == 'doom'){
+            this.bottletexture = 'doomBottle';
+        }else{
+            this.bottletexture = 'beerBottle';
+        };
+
     };
     
     
@@ -517,6 +941,7 @@ export default class Play extends Phaser.Scene{
             }
         }
         
+    
         function cheer(scene){
             let x = Math.floor(Math.random() * 4);
             switch (x) {
@@ -537,6 +962,7 @@ export default class Play extends Phaser.Scene{
             scene.scene.launch('Check');
             
         };
+
 
         function ranInt(max) {
             return Math.floor(Math.random() * max);
@@ -562,12 +988,13 @@ export default class Play extends Phaser.Scene{
                     scene.strikeLimiter = false;
                 });
             }else{
+                if(scene.over == false){
                 let strike = scene.add.sprite(scene.strikeX + 50, gameH*0.2 , 'error');
                 strike.setScale(0.15);
                 scene.strikes += 1;
                 console.log(scene.strikes);
                 scene.strikeX += 120;
-                if(scene.over == false){
+                
                     scene.strikeSound.play();
                     };
             }
@@ -580,15 +1007,20 @@ export default class Play extends Phaser.Scene{
             return Phaser.Geom.Intersects.RectangleToRectangle(boundsA, boundsB);
         };
 
+       
         function spawnBottle(scene, x , speed, score){
             if(scene.osu == false){
-            let bottle = scene.physics.add.sprite(x, gameH - gameH - 100 , 'beerBottle');
+            let bottle = scene.physics.add.sprite(x, gameH - gameH - 100 , scene.bottletexture);
             bottle.setScale(0.1).setGravityY(speed);
+            if(scene.inverted == true){
+                bottle.setTexture('blackBottle');  
+              };
+
             scene.bottles.push(bottle);
             scene.onScreenBottles += 1;
            
             scene.physics.add.collider(scene.crate , bottle, ()=>{
-                if(scene.threshold <= 500){
+                if(scene.speed <= 500){
                     scene.catch.play();
                 };
                 scene.onScreenBottles -= 1;
@@ -604,6 +1036,27 @@ export default class Play extends Phaser.Scene{
 
                 bottle.destroy();
             });
+
+            if(scene.inverted == true){
+                scene.physics.add.collider(scene.crate2 , bottle, ()=>{
+                    if(scene.speed <= 500){
+                        scene.catch.play();
+                    };
+                    scene.onScreenBottles -= 1;
+                    if(scene.strikes < 3){
+                    scene.tween = scene.tweens.addCounter({
+                        from: scene.score,
+                        to: scene.score + score,
+                        duration: 550,
+                        paused: false
+                    });
+                };
+                    scene.score += score;
+    
+                    bottle.destroy();
+                });
+            };
+
             scene.physics.add.collider(scene.zone , bottle, ()=>{
                 if(scene.strikes <3){
                 strike(scene);
@@ -1028,6 +1481,7 @@ export default class Play extends Phaser.Scene{
                 };
         }, scene);
 
+   
         scene.physics.add.collider(scene.zone , bottle.obj, ()=>{
             if(scene.strikes <3){
             strike(scene);
@@ -1036,17 +1490,21 @@ export default class Play extends Phaser.Scene{
             }
         });
         };
+    };
      
-        };
+  
 
         var diff = time - this.lastBeerTime;
         if (diff > this.delta && this.strikes < 3 && this.ready == true) {
           this.lastBeerTime = time;
           if (this.delta > this.threshold) {
-            this.delta -= 20 - this.speedBuff;
+            this.delta -= 20 + this.speedBuff;
           }
           var pos = (this.table.x - this.table.width/2) + ranInt(this.table.width);
           let chance = Math.floor(Math.random() * 1000);
+          if(this.difficulty == 'doom'){
+            spawnBottle(this, pos , this.speed, this.bottleScore);
+          }else{
           if(this.osu == false){
             if(chance <= 5){
             spawnClearBottle(this, pos , this.speed, this.bottleScore);
@@ -1071,7 +1529,11 @@ export default class Play extends Phaser.Scene{
               
         };
         };
-
+    };
+    // if(this.sw1 = true){
+    //   spawnBottle(this, gameW/2 , this.speed, this.bottleScore);
+    //   this.sw1 = false;
+    // };
         
         if(this.over == false){
         this.table.setInteractive().on('pointerover', ()=>{
@@ -1081,23 +1543,27 @@ export default class Play extends Phaser.Scene{
         });
     };
 
-        if(this.difficulty != 'hard'){
+        if(this.difficulty == 'hard' || this.difficulty == 'doom'){
+            this.crate.x = game.input.mousePointer.x;
+            if(this.switch == true){
+                this.crate.setVisible(true);
+            }else{
+                this.crate.setVisible(false);
+            }
+
+
+       
+    }else{
         if(this.switch == true){
             this.crate.x = game.input.mousePointer.x;
         };
-    }else{
-        this.crate.x = game.input.mousePointer.x;
-        if(this.switch == true){
-            this.crate.setVisible(true);
-        }else{
-            this.crate.setVisible(false);
-        }
     }
-        if(this.osu != true){
-        if(this.tween != null){
+        if(this.osu != true && this.difficulty != 'doom'){
+        if(this.tween != null && this.over == false){
             this.scoreNumber.setText(Math.trunc(this.tween.getValue()));
         }
-    }else{
+    }else if(this.osu == true && this.difficulty != 'doom'){
+        
             this.osuScore = this.bottlesLeft - this.bottlesSpawned;
             this.scoreNumber.setText(this.osuScore);
         };
@@ -1458,7 +1924,80 @@ export default class Play extends Phaser.Scene{
             }
         };
             };
+
             
+            
+
+        if(this.over == false && this.difficulty == 'doom'){
+            this.music.resume();
+        };
+
+        if(this.strikes >= 3 && this.over == false && this.difficulty=='doom'){
+            this.music.pause();
+            let card = this.add.sprite(gameW/2, gameH/2 , 'card').setDepth(4).setScale(2);
+            this.cardText = this.add.text(gameW/2, gameH/2, "You lost. But it's fine , just try again!", { font: "bold 55px Arial", fill: "#FAD02C", stroke: '#000000', strokeThickness: 5 }).setDepth(6).setOrigin(0.5, 0.5);
+            if (this.sw6 == true ){
+                this.gameover.play();
+            };
+            this.sw6 = false;
+            this.return = this.add.sprite(gameW/2, gameH * 0.8, 'return').setDepth(6).setScale(0.7).setFrame(0).setInteractive().on('pointerover', function(){
+                this.setFrame(1);
+            }).on('pointerdown', function(event){
+            
+                this.return.setFrame(1);
+                this.buttonClick.play();
+                this.table.setInteractive(false);
+    
+                this.ready = false;
+                this.over = true;
+                this.switch = false;
+                    distruge(this.pole1);
+                    distruge(this.pole2);
+                    distruge(this.table);
+                    distruge(this.background);
+        
+
+                var timedEvent = this.time.delayedCall(1500, ()=>{
+                    
+                    // this.win.destroy();
+                    // this.shadow6.destroy();
+
+
+
+                        
+                        this.textures.remove('table');
+                        this.textures.remove('pole');
+                      
+                    
+                    this.cache.audio.remove('music');
+                    // this.cache.video.remove('poltergeist');
+                    // this.cache.video.remove('animedoom');
+                
+               
+                    // this.scene.restart('Menu');
+                    
+                    let info = [this.sfxClick, this.musicClick, true];
+                    console.log(info);
+                    this.score = 0;
+            this.bottlesSpawned = 0;
+            this.osuScore = 0;
+            distruge(this.scoreNumber);
+            distruge(this.scoreTitle);
+                    this.scene.start('Menu', info);
+                   
+            } , [], this);
+    
+            }, this).on('pointerup', function(){
+                this.setFrame(0);
+                
+            }).on('pointerout', function(){
+    
+                this.setFrame(0);
+            });
+
+        };
+
+        if(this.difficulty != 'doom'){
             if(this.score >= this.target || this.strikes >= 3 || this.osuScore <= 0){
                 this.ready = false;
                 this.over = true;
@@ -1482,7 +2021,8 @@ export default class Play extends Phaser.Scene{
                 //     }
                 // };
                 // this.board.destroy();
-                if(this.score >= this.target || this.osuScore <= 0){
+                if(this.score >= this.target || this.osuScore <= 0 && this.difficulty != 'doom'){
+                    
                     this.win.setVisible(true).setDepth(5);
                     if (this.sw6 == true ){
                         this.winSound.play();
@@ -1508,6 +2048,7 @@ export default class Play extends Phaser.Scene{
                     this.return.setFrame(1);
                     this.buttonClick.play();
                     this.table.setInteractive(false);
+                    
                     distruge(this.img1);
                     distruge(this.img2);
                     distruge(this.img3);
@@ -1607,8 +2148,10 @@ export default class Play extends Phaser.Scene{
                 this.bottlesSpawned = 0;
                 this.osuScore = 0;
                 this.scoreNumber.setText('0');
+                this.scoreNumber.destroy();
+                this.scoreTitle.destroy();
                         this.scene.start('Menu', info);
-                       
+                        this.return.destroy();
                 } , [], this);
         
                 }, this).on('pointerup', function(){
@@ -1620,7 +2163,7 @@ export default class Play extends Phaser.Scene{
                 });
             };
     };
-    
+};
     };
 
    
