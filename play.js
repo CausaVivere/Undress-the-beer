@@ -1562,7 +1562,7 @@ export default class Play extends Phaser.Scene{
         if(this.tween != null && this.over == false){
             this.scoreNumber.setText(Math.trunc(this.tween.getValue()));
         }
-    }else if(this.osu == true && this.difficulty != 'doom'){
+    }else if(this.osu == true && this.difficulty != 'doom' && this.over == false){
         
             this.osuScore = this.bottlesLeft - this.bottlesSpawned;
             this.scoreNumber.setText(this.osuScore);
